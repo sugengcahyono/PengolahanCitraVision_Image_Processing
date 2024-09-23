@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>800</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <widget class="QWidget" name="centralwidget"/>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>31</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuSegmentasi">
+    <property name="title">
+     <string>Segmentasi</string>
+    </property>
+    <addaction name="actionRegion_Growing"/>
+    <addaction name="actionK_Means_Clustering"/>
+    <addaction name="actionWatershed"/>
+    <addaction name="actionGlobal_Thresholding"/>
+    <addaction name="actionAdaptive_Thresholding"/>
+   </widget>
+   <addaction name="menuSegmentasi"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionRegion_Growing">
+   <property name="text">
+    <string>Region Growing</string>
+   </property>
+  </action>
+  <action name="actionK_Means_Clustering">
+   <property name="text">
+    <string>K-Means Clustering</string>
+   </property>
+  </action>
+  <action name="actionWatershed">
+   <property name="text">
+    <string>Watershed</string>
+   </property>
+  </action>
+  <action name="actionGlobal_Thresholding">
+   <property name="text">
+    <string>Global Thresholding</string>
+   </property>
+  </action>
+  <action name="actionAdaptive_Thresholding">
+   <property name="text">
+    <string>Adaptive Thresholding</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
