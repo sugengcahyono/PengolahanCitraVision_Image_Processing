@@ -26,6 +26,7 @@ from GUI_Translasi import TranslasiDialog
 from GUI_Rotasi import RotasiDialog
 from GUI_Zoom import ZoomDialog
 from GUI_Crop_Region import CropDialog
+from skimage.morphology import skeletonize, thin
 
 
 class Ui_MainWindow(QtWidgets.QMainWindow):
@@ -1661,9 +1662,488 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
 
 
+    def erosion_square_3(self):
+        # Membuka citra menggunakan PIL
+        image = self.imagefile
+
+        # Mengonversi citra ke numpy array (akan tetap dalam RGB jika citra berwarna)
+        image_np = np.array(image)
+
+        # Jika gambar berwarna (3 channel), konversi ke grayscale
+        if len(image_np.shape) == 3:
+            image_np = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
+
+        # Mengonversi gambar grayscale menjadi biner menggunakan threshold
+        _, binary_img = cv2.threshold(image_np, 127, 255, cv2.THRESH_BINARY)
+
+        # Membuat kernel square 3x3
+        kernel = np.ones((3, 3), np.uint8)
+
+        # Melakukan operasi erosi
+        erosion_img = cv2.erode(binary_img, kernel, iterations=1)
+
+        # Mengubah array hasil erosi kembali ke gambar
+        erosion_image = Image.fromarray(erosion_img.astype(np.uint8))
+        self.imageResult = erosion_image  # Simpan hasil untuk keperluan save
+
+        # Menyimpan citra hasil erosi sebagai Image object sementara
+        erosion_image.save("output_erosion_square3_temp.jpg")
+
+        # Menampilkan gambar hasil erosi di kotak output (graphicsView_2)
+        pixmap = QtGui.QPixmap("output_erosion_square3_temp.jpg")
+        scaled_pixmap = pixmap.scaled(self.graphicsView_2.width(), self.graphicsView_2.height(), QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Hapus konten sebelumnya di output scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+
+    
+    def erosion_square_5(self):
+        # Membuka citra menggunakan PIL
+        image = self.imagefile
+
+        # Mengonversi citra ke numpy array (akan tetap dalam RGB jika citra berwarna)
+        image_np = np.array(image)
+
+        # Jika gambar berwarna (3 channel), konversi ke grayscale
+        if len(image_np.shape) == 3:
+            image_np = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
+
+        # Mengonversi gambar grayscale menjadi biner menggunakan threshold
+        _, binary_img = cv2.threshold(image_np, 127, 255, cv2.THRESH_BINARY)
+
+        # Membuat kernel square 3x3
+        kernel = np.ones((5, 5), np.uint8)
+
+        # Melakukan operasi erosi
+        erosion_img = cv2.erode(binary_img, kernel, iterations=1)
+
+        # Mengubah array hasil erosi kembali ke gambar
+        erosion_image = Image.fromarray(erosion_img.astype(np.uint8))
+        self.imageResult = erosion_image  # Simpan hasil untuk keperluan save
+
+        # Menyimpan citra hasil erosi sebagai Image object sementara
+        erosion_image.save("output_erosion_square5_temp.jpg")
+
+        # Menampilkan gambar hasil erosi di kotak output (graphicsView_2)
+        pixmap = QtGui.QPixmap("output_erosion_square5_temp.jpg")
+        scaled_pixmap = pixmap.scaled(self.graphicsView_2.width(), self.graphicsView_2.height(), QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Hapus konten sebelumnya di output scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+
+    def erosion_cross_3(self):
+        # Membuka citra menggunakan PIL
+        image = self.imagefile
+
+        # Mengonversi citra ke numpy array
+        image_np = np.array(image)
+
+        # Jika gambar berwarna (3 channel), konversi ke grayscale
+        if len(image_np.shape) == 3:
+            image_np = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
+
+        # Mengonversi gambar grayscale menjadi biner menggunakan threshold
+        _, binary_img = cv2.threshold(image_np, 127, 255, cv2.THRESH_BINARY)
+
+        # Membuat kernel cross 3x3
+        kernel = np.array([[0, 1, 0],
+                        [1, 1, 1],
+                        [0, 1, 0]], np.uint8)
+
+        # Melakukan operasi erosi
+        erosion_img = cv2.erode(binary_img, kernel, iterations=1)
+
+        # Mengubah array hasil erosi kembali ke gambar
+        erosion_image = Image.fromarray(erosion_img.astype(np.uint8))
+        self.imageResult = erosion_image  # Simpan hasil untuk keperluan save
+
+        # Menyimpan citra hasil erosi sebagai Image object sementara
+        erosion_image.save("output_erosion_cross3_temp.jpg")
+
+        # Menampilkan gambar hasil erosi di kotak output (graphicsView_2)
+        pixmap = QtGui.QPixmap("output_erosion_cross3_temp.jpg")
+        scaled_pixmap = pixmap.scaled(self.graphicsView_2.width(), self.graphicsView_2.height(), QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Hapus konten sebelumnya di output scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+
+    def dilation_square_3(self):
+        # Membuka citra menggunakan PIL
+        image = self.imagefile
+
+        # Mengonversi citra ke numpy array
+        image_np = np.array(image)
+
+        # Jika gambar berwarna (3 channel), konversi ke grayscale
+        if len(image_np.shape) == 3:
+            image_np = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
+
+        # Mengonversi gambar grayscale menjadi biner menggunakan threshold
+        _, binary_img = cv2.threshold(image_np, 127, 255, cv2.THRESH_BINARY)
+
+        # Membuat kernel square 3x3
+        kernel = np.ones((3, 3), np.uint8)
+
+        # Melakukan operasi dilasi
+        dilation_img = cv2.dilate(binary_img, kernel, iterations=1)
+
+        # Mengubah array hasil dilasi kembali ke gambar
+        dilation_image = Image.fromarray(dilation_img.astype(np.uint8))
+        self.imageResult = dilation_image  # Simpan hasil untuk keperluan save
+
+        # Menyimpan citra hasil dilasi sebagai Image object sementara
+        dilation_image.save("output_dilation_square3_temp.jpg")
+
+        # Menampilkan gambar hasil dilasi di kotak output (graphicsView_2)
+        pixmap = QtGui.QPixmap("output_dilation_square3_temp.jpg")
+        scaled_pixmap = pixmap.scaled(self.graphicsView_2.width(), self.graphicsView_2.height(), QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Hapus konten sebelumnya di output scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+
+    def dilation_square_5(self):
+        # Membuka citra menggunakan PIL
+        image = self.imagefile
+
+        # Mengonversi citra ke numpy array
+        image_np = np.array(image)
+
+        # Jika gambar berwarna (3 channel), konversi ke grayscale
+        if len(image_np.shape) == 3:
+            image_np = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
+
+        # Mengonversi gambar grayscale menjadi biner menggunakan threshold
+        _, binary_img = cv2.threshold(image_np, 127, 255, cv2.THRESH_BINARY)
+
+        # Membuat kernel square 3x3
+        kernel = np.ones((5, 5), np.uint8)
+
+        # Melakukan operasi dilasi
+        dilation_img = cv2.dilate(binary_img, kernel, iterations=1)
+
+        # Mengubah array hasil dilasi kembali ke gambar
+        dilation_image = Image.fromarray(dilation_img.astype(np.uint8))
+        self.imageResult = dilation_image  # Simpan hasil untuk keperluan save
+
+        # Menyimpan citra hasil dilasi sebagai Image object sementara
+        dilation_image.save("output_dilation_square5_temp.jpg")
+
+        # Menampilkan gambar hasil dilasi di kotak output (graphicsView_2)
+        pixmap = QtGui.QPixmap("output_dilation_square5_temp.jpg")
+        scaled_pixmap = pixmap.scaled(self.graphicsView_2.width(), self.graphicsView_2.height(), QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Hapus konten sebelumnya di output scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+
+    def dilation_cross_3(self):
+        # Membuka citra menggunakan PIL
+        image = self.imagefile
+
+        # Mengonversi citra ke numpy array
+        image_np = np.array(image)
+
+        # Jika gambar berwarna (3 channel), konversi ke grayscale
+        if len(image_np.shape) == 3:
+            image_np = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
+
+        # Mengonversi gambar grayscale menjadi biner menggunakan threshold
+        _, binary_img = cv2.threshold(image_np, 127, 255, cv2.THRESH_BINARY)
+
+        # Membuat kernel cross 3x3
+        kernel = np.array([[0, 1, 0],
+                        [1, 1, 1],
+                        [0, 1, 0]], np.uint8)
+
+        # Melakukan operasi dilasi
+        dilation_img = cv2.dilate(binary_img, kernel, iterations=1)
+
+        # Mengubah array hasil dilasi kembali ke gambar
+        dilation_image = Image.fromarray(dilation_img.astype(np.uint8))
+        self.imageResult = dilation_image  # Simpan hasil untuk keperluan save
+
+        # Menyimpan citra hasil dilasi sebagai Image object sementara
+        dilation_image.save("output_dilation_cross3_temp.jpg")
+
+        # Menampilkan gambar hasil dilasi di kotak output (graphicsView_2)
+        pixmap = QtGui.QPixmap("output_dilation_cross3_temp.jpg")
+        scaled_pixmap = pixmap.scaled(self.graphicsView_2.width(), self.graphicsView_2.height(), QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Hapus konten sebelumnya di output scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+
+    def opening_square_9(self):
+        # Membuka citra menggunakan PIL
+        image = self.imagefile
+
+        # Mengonversi citra ke numpy array
+        image_np = np.array(image)
+
+        # Jika gambar berwarna (3 channel), konversi ke grayscale
+        if len(image_np.shape) == 3:
+            image_np = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
+
+        # Mengonversi gambar grayscale menjadi biner menggunakan threshold
+        _, binary_img = cv2.threshold(image_np, 127, 255, cv2.THRESH_BINARY)
+
+        # Membuat kernel square 9x9
+        kernel = np.ones((9, 9), np.uint8)
+
+        # Melakukan operasi Opening (erosi diikuti dilasi)
+        opening_img = cv2.morphologyEx(binary_img, cv2.MORPH_OPEN, kernel)
+
+        # Mengubah array hasil opening kembali ke gambar
+        opening_image = Image.fromarray(opening_img.astype(np.uint8))
+        self.imageResult = opening_image  # Simpan hasil untuk keperluan save
+
+        # Menyimpan citra hasil opening sebagai Image object sementara
+        opening_image.save("output_opening_square9_temp.jpg")
+
+        # Menampilkan gambar hasil opening di kotak output (graphicsView_2)
+        pixmap = QtGui.QPixmap("output_opening_square9_temp.jpg")
+        scaled_pixmap = pixmap.scaled(self.graphicsView_2.width(), self.graphicsView_2.height(), QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Hapus konten sebelumnya di output scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+
+    def closing_square_9(self):
+        # Membuka citra menggunakan PIL
+        image = self.imagefile
+
+        # Mengonversi citra ke numpy array
+        image_np = np.array(image)
+
+        # Jika gambar berwarna (3 channel), konversi ke grayscale
+        if len(image_np.shape) == 3:
+            image_np = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
+
+        # Mengonversi gambar grayscale menjadi biner menggunakan threshold
+        _, binary_img = cv2.threshold(image_np, 127, 255, cv2.THRESH_BINARY)
+
+        # Membuat kernel square 9x9
+        kernel = np.ones((9, 9), np.uint8)
+
+        # Melakukan operasi Closing (dilasi diikuti erosi)
+        closing_img = cv2.morphologyEx(binary_img, cv2.MORPH_CLOSE, kernel)
+
+        # Mengubah array hasil closing kembali ke gambar
+        closing_image = Image.fromarray(closing_img.astype(np.uint8))
+        self.imageResult = closing_image  # Simpan hasil untuk keperluan save
+
+        # Menyimpan citra hasil closing sebagai Image object sementara
+        closing_image.save("output_closing_square9_temp.jpg")
+
+        # Menampilkan gambar hasil closing di kotak output (graphicsView_2)
+        pixmap = QtGui.QPixmap("output_closing_square9_temp.jpg")
+        scaled_pixmap = pixmap.scaled(self.graphicsView_2.width(), self.graphicsView_2.height(), QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Hapus konten sebelumnya di output scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
 
 
+    def hit_or_miss(self):
+        # Membuka citra menggunakan PIL
+        image = self.imagefile
 
+        # Mengonversi citra ke numpy array
+        image_np = np.array(image)
+
+        # Jika gambar berwarna (3 channel), konversi ke grayscale
+        if len(image_np.shape) == 3:
+            image_np = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
+
+        # Mengonversi gambar grayscale menjadi biner menggunakan threshold
+        _, binary_img = cv2.threshold(image_np, 127, 255, cv2.THRESH_BINARY)
+
+        # Membuat kernel Hit-or-Miss
+        kernel_hitmiss = np.array([[1, 1, 1],
+                                [0, 1, 0],
+                                [-1, -1, -1]], dtype=np.int8)
+
+        # Melakukan operasi Hit-or-Miss
+        hit_or_miss_img = cv2.morphologyEx(binary_img, cv2.MORPH_HITMISS, kernel_hitmiss)
+
+        # Mengubah array hasil Hit-or-Miss kembali ke gambar
+        hit_or_miss_image = Image.fromarray(hit_or_miss_img.astype(np.uint8))
+        self.imageResult = hit_or_miss_image  # Simpan hasil untuk keperluan save
+
+        # Menyimpan citra hasil Hit-or-Miss sebagai Image object sementara
+        hit_or_miss_image.save("output_hit_or_miss_temp.jpg")
+
+        # Menampilkan gambar hasil Hit-or-Miss di kotak output (graphicsView_2)
+        pixmap = QtGui.QPixmap("output_hit_or_miss_temp.jpg")
+        scaled_pixmap = pixmap.scaled(self.graphicsView_2.width(), self.graphicsView_2.height(), QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Hapus konten sebelumnya di output scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+
+
+    def thinning(self):
+        # Membuka citra menggunakan PIL
+        image = self.imagefile
+
+        # Mengonversi citra ke numpy array
+        image_np = np.array(image)
+
+        # Jika gambar berwarna (3 channel), konversi ke grayscale
+        if len(image_np.shape) == 3:
+            image_np = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
+
+        # Mengonversi gambar grayscale menjadi biner menggunakan threshold
+        _, binary_img = cv2.threshold(image_np, 127, 255, cv2.THRESH_BINARY)
+
+        # Pastikan gambar biner dalam tipe data uint8
+        binary_img = binary_img.astype(np.uint8)
+
+        # Melakukan operasi Thinning
+        thinned_img = thin(binary_img // 255) * 255  # Menggunakan skimage untuk melakukan penipisan
+
+        # Mengubah array hasil Thinning kembali ke gambar
+        thinned_image = Image.fromarray(thinned_img.astype(np.uint8))
+        self.imageResult = thinned_image  # Simpan hasil untuk keperluan save
+
+        # Menyimpan citra hasil Thinning sebagai Image object sementara
+        thinned_image.save("output_thinning_temp.jpg")
+
+        # Menampilkan gambar hasil Thinning di kotak output (graphicsView_2)
+        pixmap = QtGui.QPixmap("output_thinning_temp.jpg")
+        scaled_pixmap = pixmap.scaled(self.graphicsView_2.width(), self.graphicsView_2.height(), QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Hapus konten sebelumnya di output scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+
+    def thickening(self):
+        # Membuka citra menggunakan PIL
+        image = self.imagefile
+
+        # Mengonversi citra ke numpy array
+        image_np = np.array(image)
+
+        # Jika gambar berwarna (3 channel), konversi ke grayscale
+        if len(image_np.shape) == 3:
+            image_np = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
+
+        # Mengonversi gambar grayscale menjadi biner menggunakan threshold
+        _, binary_img = cv2.threshold(image_np, 127, 255, cv2.THRESH_BINARY)
+
+        # Pastikan gambar biner dalam tipe data uint8
+        binary_img = binary_img.astype(np.uint8)
+
+        # Membuat kernel untuk operasi morfologi
+        kernel = np.ones((3, 3), np.uint8)  # Kernel 3x3 untuk morfologi
+
+        # Melakukan operasi Erosi
+        erosion = cv2.erode(binary_img, kernel, iterations=1)
+
+        # Melakukan operasi Dilasi
+        dilation = cv2.dilate(binary_img, kernel, iterations=1)
+
+        # Melakukan Thickening (Penebalan)
+        thickened_img = dilation - erosion
+
+        # Mengubah array hasil Thickening kembali ke gambar
+        thickened_image = Image.fromarray(thickened_img.astype(np.uint8))
+        self.imageResult = thickened_image  # Simpan hasil untuk keperluan save
+
+        # Menyimpan citra hasil Thickening sebagai Image object sementara
+        thickened_image.save("output_thickening_temp.jpg")
+
+        # Menampilkan gambar hasil Thickening di kotak output (graphicsView_2)
+        pixmap = QtGui.QPixmap("output_thickening_temp.jpg")
+        scaled_pixmap = pixmap.scaled(self.graphicsView_2.width(), self.graphicsView_2.height(), QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Hapus konten sebelumnya di output scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+
+    def skeletonization(self):
+        # Membuka citra menggunakan PIL
+        image = self.imagefile
+
+        # Mengonversi citra ke numpy array
+        image_np = np.array(image)
+
+        # Jika gambar berwarna (3 channel), konversi ke grayscale
+        if len(image_np.shape) == 3:
+            image_np = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
+
+        # Mengonversi gambar grayscale menjadi biner menggunakan threshold
+        _, binary_img = cv2.threshold(image_np, 127, 255, cv2.THRESH_BINARY)
+
+        # Pastikan gambar biner dalam tipe data uint8
+        binary_img = binary_img.astype(np.uint8)
+
+        # Melakukan Skeletonization menggunakan skimage
+        skeleton = skeletonize(binary_img // 255) * 255  # Membagi dengan 255 untuk mengubah menjadi 0 dan 1, kemudian dikalikan 255 untuk hasil biner
+
+        # Mengubah array hasil skeletonization kembali ke gambar
+        skeleton_image = Image.fromarray(skeleton.astype(np.uint8))
+        self.imageResult = skeleton_image  # Simpan hasil untuk keperluan save
+
+        # Menyimpan citra hasil Skeletonization sebagai Image object sementara
+        skeleton_image.save("output_skeleton_temp.jpg")
+
+        # Menampilkan gambar hasil Skeletonization di kotak output (graphicsView_2)
+        pixmap = QtGui.QPixmap("output_skeleton_temp.jpg")
+        scaled_pixmap = pixmap.scaled(self.graphicsView_2.width(), self.graphicsView_2.height(), QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Hapus konten sebelumnya di output scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+
+    def prune_skeleton(self):
+        # Membuka citra menggunakan PIL
+        image = self.imagefile
+
+        # Mengonversi citra ke numpy array
+        image_np = np.array(image)
+
+        # Jika gambar berwarna (3 channel), konversi ke grayscale
+        if len(image_np.shape) == 3:
+            image_np = cv2.cvtColor(image_np, cv2.COLOR_RGB2GRAY)
+
+        # Mengonversi gambar grayscale menjadi biner menggunakan threshold
+        _, binary_img = cv2.threshold(image_np, 127, 255, cv2.THRESH_BINARY)
+
+        # Pastikan gambar biner dalam tipe data uint8
+        binary_img = binary_img.astype(np.uint8)
+
+        # Melakukan Skeletonization menggunakan skimage
+        skeleton = skeletonize(binary_img // 255) * 255  # Skeletonization
+
+        # Membuat kernel hit-or-miss
+        kernel_hitmiss = np.array([[1, 1, 1],
+                                    [0, 1, 0],
+                                    [-1, -1, -1]])
+
+        # Mengimplementasikan fungsi pruning
+        pruned_img = skeleton.copy().astype(np.uint8)  # Salin citra kerangka
+        for _ in range(2):  # Iterasi pruning, bisa disesuaikan
+            pruned_img = cv2.morphologyEx(pruned_img, cv2.MORPH_HITMISS, kernel_hitmiss)
+
+        # Mengubah array hasil pruning kembali ke gambar
+        pruned_image = Image.fromarray(pruned_img.astype(np.uint8))
+        self.imageResult = pruned_image  # Simpan hasil untuk keperluan save
+
+        # Menyimpan citra hasil Pruning sebagai Image object sementara
+        pruned_image.save("output_pruning_temp.jpg")
+
+        # Menampilkan gambar hasil Pruning di kotak output (graphicsView_2)
+        pixmap = QtGui.QPixmap("output_pruning_temp.jpg")
+        scaled_pixmap = pixmap.scaled(self.graphicsView_2.width(), self.graphicsView_2.height(), QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Hapus konten sebelumnya di output scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
 
 
 
@@ -1778,6 +2258,34 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.menuOpening.setObjectName("menuOpening")
         self.menuClosing = QtWidgets.QMenu(self.menuMorfologi)
         self.menuClosing.setObjectName("menuClosing")
+
+        # set menu Hit or Miss
+        self.menuHitormiss = QtWidgets.QAction(self.menuMorfologi)
+        self.menuHitormiss.setObjectName("menuHitormiss")
+        self.menuHitormiss.triggered.connect(self.hit_or_miss)
+
+        # set menu Thinning
+        self.menuThinning = QtWidgets.QAction(self.menuMorfologi)
+        self.menuThinning.setObjectName("menuThinning")
+        self.menuThinning.triggered.connect(self.thinning)
+
+        # set menu Thickening
+        self.menuThickening = QtWidgets.QAction(self.menuMorfologi)
+        self.menuThickening.setObjectName("menuThickening")
+        self.menuThickening.triggered.connect(self.thickening)
+
+        #set fungsi skeletonization
+        self.menuSkeletonization = QtWidgets.QAction(self.menuMorfologi)
+        self.menuSkeletonization.setObjectName("menuSkeletonization")
+        self.menuSkeletonization.triggered.connect(self.skeletonization)
+
+        # set fungsi prunning
+        self.menuPrunning = QtWidgets.QAction(self.menuMorfologi)
+        self.menuPrunning.setObjectName("menuPrunning")
+        self.menuPrunning.triggered.connect(self.prune_skeleton)
+
+
+
         
         self.menuClear = QtWidgets.QMenu(self.menubar)
         self.menuClear.setObjectName("menuClear")
@@ -2020,22 +2528,47 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.actionPrewitt.setObjectName("actionPrewitt")
         self.actionSobel = QtWidgets.QAction(MainWindow)
         self.actionSobel.setObjectName("actionSobel")
+
+        # set Erosi Square 3
         self.actionSquare_3 = QtWidgets.QAction(MainWindow)
         self.actionSquare_3.setObjectName("actionSquare_3")
+        self.actionSquare_3.triggered.connect(self.erosion_square_3)
+
+        # set Erosi Square 5
         self.actionSquare_5 = QtWidgets.QAction(MainWindow)
         self.actionSquare_5.setObjectName("actionSquare_5")
+        self.actionSquare_5.triggered.connect(self.erosion_square_5)
+
+        # set fungsi Cross 3
         self.actionCross_3 = QtWidgets.QAction(MainWindow)
         self.actionCross_3.setObjectName("actionCross_3")
+        self.actionCross_3.triggered.connect(self.erosion_cross_3)
+
+        # set fungsi Dilasi square 3
         self.actionSquare_4 = QtWidgets.QAction(MainWindow)
         self.actionSquare_4.setObjectName("actionSquare_4")
+        self.actionSquare_4.triggered.connect(self.dilation_square_3)
+
+        # set fungsi Dilasi square 5
         self.actionSquare_6 = QtWidgets.QAction(MainWindow)
         self.actionSquare_6.setObjectName("actionSquare_6")
+        self.actionSquare_6.triggered.connect(self.dilation_square_5)
+
+        # set fungsi Dilasi Cross 3
         self.actionCross_4 = QtWidgets.QAction(MainWindow)
         self.actionCross_4.setObjectName("actionCross_4")
+        self.actionCross_4.triggered.connect(self.dilation_cross_3)
+
+        # set fungsi Opening Square 9
         self.actionSquare_9 = QtWidgets.QAction(MainWindow)
         self.actionSquare_9.setObjectName("actionSquare_9")
+        self.actionSquare_9.triggered.connect(self.opening_square_9)
+
+        # set fungsi Clossing square 9
         self.actionSquare_10 = QtWidgets.QAction(MainWindow)
         self.actionSquare_10.setObjectName("actionSquare_10")
+        self.actionSquare_10.triggered.connect(self.closing_square_9)
+
         self.menuFile.addAction(self.actionOpen)
         self.menuFile.addAction(self.actionSave_As)
         self.menuFile.addAction(self.actionExit)
@@ -2069,6 +2602,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.menuColors.addAction(self.actionBrightnessandContrast)
         self.menuColors.addAction(self.actionKuantitas)
         self.menuClear.addAction(self.actionClear)
+
+        
         
         self.menuColors.addAction(self.actionInvers)
         self.menuColors.addAction(self.actionLog_Brigthness)
@@ -2105,6 +2640,15 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.menuMorfologi.addAction(self.menuDilation.menuAction())
         self.menuMorfologi.addAction(self.menuOpening.menuAction())
         self.menuMorfologi.addAction(self.menuClosing.menuAction())
+
+        self.menuMorfologi.addAction(self.menuHitormiss)
+        self.menuMorfologi.addAction(self.menuThinning)
+        self.menuMorfologi.addAction(self.menuThickening)
+        self.menuMorfologi.addAction(self.menuSkeletonization)
+        self.menuMorfologi.addAction(self.menuPrunning)
+
+        
+
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuView.menuAction())
         self.menubar.addAction(self.menuColors.menuAction())
@@ -2165,6 +2709,13 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.menuDilation.setTitle(_translate("MainWindow", "Dilation"))
         self.menuOpening.setTitle(_translate("MainWindow", "Opening"))
         self.menuClosing.setTitle(_translate("MainWindow", "Closing"))
+        self.menuHitormiss.setText(_translate("MainWindow", "Hit-or-Miss"))
+        self.menuThinning.setText(_translate("MainWindow", "Thinning"))
+        self.menuThickening.setText(_translate("MainWindow", "Thickening"))
+        self.menuSkeletonization.setText(_translate("MainWindow", "Skeletonization"))
+        self.menuPrunning.setText(_translate("MainWindow", "Prunning"))
+
+
         self.menuClear.setTitle(_translate("MainWindow", "Clear"))
         self.actionClear.setText(_translate("MainWindow", "Clear"))
         self.actionOpen.setText(_translate("MainWindow", "Open"))

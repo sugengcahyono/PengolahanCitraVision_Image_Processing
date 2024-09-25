@@ -5,13 +5,13 @@ import matplotlib.pyplot as plt
 
 
 # Baca gambar biner
-img = cv2.imread('D:/KULIAH/Semester 5/Project_Python/Direktori_gambar/binary_image.png', 0) #pastikan gambar sudah biner 
+img = cv2.imread('D:/KULIAH/Semester 5/Project_Python/Direktori_gambar/tomate.jpg', 0) #pastikan gambar sudah biner 
 _, binary_img = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
 
 binary_img = binary_img.astype(np.uint8)  # Pastikan tipe data biner sesuai
 
 # kernel morfologi
-kernel = np.ones((3,3), np.uint8)
+kernel = np.ones((3,3), np.uint8) 
 
 # 1. Erosi
 erosion = cv2.erode(binary_img, kernel, iterations=1)
@@ -23,7 +23,7 @@ dilation = cv2.dilate(binary_img, kernel, iterations=1)
 opening = cv2.morphologyEx(binary_img, cv2.MORPH_OPEN, kernel)
 
 # 4. closing (dilasi kemudian erosi)
-closing = cv2.morphologyEx(binary_img, cv2.MORPH_OPEN, kernel)
+closing = cv2.morphologyEx(binary_img, cv2.MORPH_CLOSE, kernel)
 
 # 5. Hit-or-Miss
 #Membuat kernel hit-or-miss (ada berbagai variasi)
@@ -37,7 +37,7 @@ hit_or_miss = cv2.morphologyEx(binary_img, cv2.MORPH_HITMISS, kernel_hitmiss)
 thinned_img = thin(binary_img // 255) * 255 #menggunakan skimage
 
 # 7. Thickening (Penebalan - tidak ada langsung di OpenCV, bisa dikombinasikan dengan operasi lain)
-thickpening = cv2.dilate(binary_img, kernel, iterations=1) - erosion
+thickening = cv2.dilate(binary_img, kernel, iterations=1) - erosion
 
 # 8. Skeletonization (Kerangka)
 skeleton = skeletonize(binary_img // 255) * 255 #menggunakan skimage
