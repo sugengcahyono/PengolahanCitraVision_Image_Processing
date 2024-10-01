@@ -27,6 +27,7 @@ from GUI_Rotasi import RotasiDialog
 from GUI_Zoom import ZoomDialog
 from GUI_Crop_Region import CropDialog
 from skimage.morphology import skeletonize, thin
+from skimage import data
 
 
 class Ui_MainWindow(QtWidgets.QMainWindow):
@@ -2146,6 +2147,99 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
 
 
+    def sobel(self):
+        # Membuka citra menggunakan PIL
+        image = self.imagefile
+
+        # Mengonversi citra ke numpy array dan mengubah ke grayscale
+        image_np = np.array(image.convert('L'))  # Mengubah ke grayscale
+
+        # Terapkan operator Sobel untuk gradien horizontal dan vertikal
+        sobel_x = cv2.Sobel(image_np, cv2.CV_64F, 1, 0, ksize=3)  # Gradien horizontal
+        sobel_y = cv2.Sobel(image_np, cv2.CV_64F, 0, 1, ksize=3)  # Gradien vertikal
+
+        # Kombinasikan hasil dari gradien X dan Y menggunakan magnitude
+        sobel_combined = np.sqrt(np.square(sobel_x) + np.square(sobel_y))
+
+        # Normalisasi hasil Sobel ke rentang 0-255
+        sobel_combined = (sobel_combined / np.max(sobel_combined)) * 255
+        sobel_combined = sobel_combined.astype(np.uint8)
+
+        # Mengubah array hasil menjadi gambar PIL untuk ditampilkan
+        sobel_image_pil = Image.fromarray(sobel_combined)
+
+        # Menyimpan hasil gambar sementara
+        sobel_image_pil.save("output_sobel_temp.jpg")
+
+        # Tampilkan gambar di GUI menggunakan PyQt5
+        pixmap = QtGui.QPixmap("output_sobel_temp.jpg")
+        scaled_pixmap = pixmap.scaled(self.graphicsView_2.width(), self.graphicsView_2.height(), QtCore.Qt.KeepAspectRatio)
+
+        # Membersihkan dan menampilkan gambar hasil deteksi tepi Sobel di graphicsView
+        self.sceneOutput.clear()
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+
+
+    def prewitt(self):
+        # Membuka citra menggunakan PIL
+        image = self.imagefile
+
+        # Mengonversi citra ke numpy array dan mengubah ke grayscale
+        image_np = np.array(image.convert('L'))  # Mengubah ke grayscale
+
+        # Terapkan operator Prewitt secara manual
+        prewitt_x = cv2.filter2D(image_np, -1, np.array([[-1, 0, 1], [-1, 0, 1], [-1, 0, 1]]))  # Gradien Horizontal
+        prewitt_y = cv2.filter2D(image_np, -1, np.array([[1, 1, 1], [0, 0, 0], [-1, -1, -1]]))  # Gradien Vertikal
+
+        # Kombinasikan hasil dari gradien X dan Y
+        prewitt_combined = np.sqrt(np.square(prewitt_x) + np.square(prewitt_y))
+
+        # Normalisasi hasil Prewitt ke rentang 0-255
+        prewitt_combined = (prewitt_combined / np.max(prewitt_combined)) * 255
+        prewitt_combined = prewitt_combined.astype(np.uint8)
+
+        # Mengubah array hasil menjadi gambar PIL untuk ditampilkan
+        prewitt_image_pil = Image.fromarray(prewitt_combined)
+
+        # Menyimpan hasil gambar sementara
+        prewitt_image_pil.save("output_prewitt_temp.jpg")
+
+        # Tampilkan gambar di GUI menggunakan PyQt5
+        pixmap = QtGui.QPixmap("output_prewitt_temp.jpg")
+        scaled_pixmap = pixmap.scaled(self.graphicsView_2.width(), self.graphicsView_2.height(), QtCore.Qt.KeepAspectRatio)
+
+        # Membersihkan dan menampilkan gambar hasil deteksi tepi Prewitt di graphicsView
+        self.sceneOutput.clear()
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+
+    def canny(self):
+        # Membuka citra menggunakan PIL
+        image = self.imagefile
+
+        # Mengonversi citra ke numpy array dan mengubah ke grayscale
+        image_np = np.array(image.convert('L'))  # Mengubah ke grayscale
+
+        # Terapkan deteksi tepi Canny
+        canny_edges = cv2.Canny(image_np, 100, 200)
+
+        # Mengubah array hasil menjadi gambar PIL untuk ditampilkan
+        canny_image_pil = Image.fromarray(canny_edges)
+
+        # Menyimpan hasil gambar sementara
+        canny_image_pil.save("output_canny_temp.jpg")
+
+        # Tampilkan gambar di GUI menggunakan PyQt5
+        pixmap = QtGui.QPixmap("output_canny_temp.jpg")
+        scaled_pixmap = pixmap.scaled(self.graphicsView_2.width(), self.graphicsView_2.height(), QtCore.Qt.KeepAspectRatio)
+
+        # Membersihkan dan menampilkan gambar hasil deteksi tepi Canny di graphicsView
+        self.sceneOutput.clear()
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+
+
 
 
 #############################
@@ -2524,10 +2618,20 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.actionGaussian_Blur_3x3.setObjectName("actionGaussian_Blur_3x3")
         self.actionGaussian_Blur_5x5 = QtWidgets.QAction(MainWindow)
         self.actionGaussian_Blur_5x5.setObjectName("actionGaussian_Blur_5x5")
+
+        # set fungsi prewitt
         self.actionPrewitt = QtWidgets.QAction(MainWindow)
         self.actionPrewitt.setObjectName("actionPrewitt")
+        self.actionPrewitt.triggered.connect(self.prewitt)
+
+        #set fungsi sobel
         self.actionSobel = QtWidgets.QAction(MainWindow)
         self.actionSobel.setObjectName("actionSobel")
+        self.actionSobel.triggered.connect(self.sobel)
+
+        self.actionCanny = QtWidgets.QAction(MainWindow)
+        self.actionCanny.setObjectName("actionCanny")
+        self.actionCanny.triggered.connect(self.canny)
 
         # set Erosi Square 3
         self.actionSquare_3 = QtWidgets.QAction(MainWindow)
@@ -2628,6 +2732,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.menuFilter.addAction(self.actionBandstop_Filter)
         self.menuEdge_Detection_2.addAction(self.actionPrewitt)
         self.menuEdge_Detection_2.addAction(self.actionSobel)
+        self.menuEdge_Detection_2.addAction(self.actionCanny)
         self.menuErosion.addAction(self.actionSquare_3)
         self.menuErosion.addAction(self.actionSquare_5)
         self.menuErosion.addAction(self.actionCross_3)
@@ -2766,6 +2871,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.actionGaussian_Blur_3x3.setText(_translate("MainWindow", "Gaussian Blur 3x3"))
         self.actionGaussian_Blur_5x5.setText(_translate("MainWindow", "Gaussian Blur 5x5"))
         self.actionPrewitt.setText(_translate("MainWindow", "Prewitt"))
+        self.actionCanny.setText(_translate("MainWindow", "Canny"))
         self.actionSobel.setText(_translate("MainWindow", "Sobel"))
         self.actionSquare_3.setText(_translate("MainWindow", "Square 3"))
         self.actionSquare_5.setText(_translate("MainWindow", "Square 5"))
