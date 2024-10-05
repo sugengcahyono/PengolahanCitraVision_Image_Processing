@@ -28,6 +28,8 @@ from GUI_Zoom import ZoomDialog
 from GUI_Crop_Region import CropDialog
 from skimage.morphology import skeletonize, thin
 from skimage import data
+from OperasiAritmatika import Ui_MainWindow as Ui_AritmatikaWindow
+from tentang import Ui_MainWindow as tentang
 
 
 class Ui_MainWindow(QtWidgets.QMainWindow):
@@ -41,6 +43,28 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.imagefile = None
         self.imageResult = None
 
+
+    def setupUi(self, MainWindow):
+        # Konfigurasi awal untuk MainWindow
+        # Setup untuk self.actionOperasiAritmatika
+        self.actionOperasiAritmatika = QtWidgets.QAction(MainWindow)
+        self.actionOperasiAritmatika.setObjectName("actionOperasiAritmatika")
+        self.actionOperasiAritmatika.triggered.connect(self.show_aritmatika_window)  # Hubungkan ke fungsi
+        # Tambahan konfigurasi MainWindow lainnya
+
+    def show_aritmatika_window(self):
+        # Buat instance dari window aritmatika
+        self.aritmatika_window = QtWidgets.QMainWindow()
+        self.ui_aritmatika = Ui_AritmatikaWindow()
+        self.ui_aritmatika.setupUi(self.aritmatika_window)
+        self.aritmatika_window.show()
+
+    def TentangFrame(self): 
+            # Definisi fungsi frameArimatika yang merupakan metode dari suatu kelas. Fungsi ini mungkin digunakan untuk membuat dan menampilkan sebuah jendela Qt.
+            self.window = QtWidgets.QMainWindow() # Membuat sebuah objek jendela utama dari Qt.
+            self.ui = tentang() # Membuat sebuah objek dari kelas latihan.
+            self.ui.setupUi(self.window) # Memanggil metode setupUi dari objek ui untuk menginisialisasi tampilan antarmuka.
+            self.window.show()
       
     
     #metode show_image = menampilkan gambar 
@@ -2648,6 +2672,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.menuTransform.addAction(self.actionZoom)
         
         self.menuTentang.setObjectName("menuTentang")
+        
+        self.actionTentang = QtWidgets.QAction(MainWindow)
+        self.actionTentang.setObjectName("actionTentang")
+        self.actionTentang.triggered.connect(self.TentangFrame)
+
         self.menuImage_Processing = QtWidgets.QMenu(self.menubar)
         self.menuImage_Processing.setObjectName("menuImage_Processing")
         self.menuAritmetical_Operation = QtWidgets.QMenu(self.menubar)
@@ -2769,6 +2798,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.actionClear = QtWidgets.QAction(MainWindow)
         self.actionClear.setObjectName("actionClear")
         self.actionClear.triggered.connect(self.clear_images)
+
+        self.actionOperasiAritmatika = QtWidgets.QAction(MainWindow)
+        self.actionOperasiAritmatika.setObjectName("actionOperasiAritmatika")
+        self.actionOperasiAritmatika.triggered.connect(self.show_aritmatika_window)
         
         #set Invers
         self.actionInvers = QtWidgets.QAction(MainWindow)
@@ -3055,6 +3088,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.menuColors.addAction(self.actionBrightnessandContrast)
         self.menuColors.addAction(self.actionKuantitas)
         self.menuClear.addAction(self.actionClear)
+        self.menuTentang.addAction(self.actionTentang)
+        self.menuAritmetical_Operation.addAction(self.actionOperasiAritmatika)
 
         
         
@@ -3122,7 +3157,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Image Processing"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.menuView.setTitle(_translate("MainWindow", "View"))
         self.menuHistogram.setTitle(_translate("MainWindow", "Histogram"))
@@ -3152,8 +3187,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.menuBrightness.setTitle(_translate("MainWindow", "Brightness"))
         self.menuBit_Depth.setTitle(_translate("MainWindow", "Bit Depth"))
         self.menuTentang.setTitle(_translate("MainWindow", "Tentang"))
+        self.actionTentang.setText(_translate("MainWindow", "Tentang"))
         self.menuImage_Processing.setTitle(_translate("MainWindow", "Image Processing"))
         self.menuAritmetical_Operation.setTitle(_translate("MainWindow", "Aritmetical Operation"))
+        self.actionOperasiAritmatika.setText(_translate("MainWindow", "Aritmetical Operation"))
         self.menuFilter.setTitle(_translate("MainWindow", "Filter"))
         self.menuEdge_Detection.setTitle(_translate("MainWindow", "Edge Detection"))
         self.menuGaussian_Blur.setTitle(_translate("MainWindow", "Gaussian Blur"))
