@@ -14,7 +14,10 @@ import tempfile
 import os
 import cv2
 from PIL import Image, ImageOps
+import pandas as pd
 import numpy as np
+import mahotas as mt
+from openpyxl import load_workbook
 import matplotlib.pyplot as plt
 from Gui_LogBrightness import LogBrightnessDialog
 from Gui_Brightness import LinearBrightnessDialog
@@ -42,6 +45,7 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.image_pixmap = None  # Variable to store the selected image pixmap
         self.imagefile = None
         self.imageResult = None
+       
 
 
     def setupUi(self, MainWindow):
@@ -2582,6 +2586,124 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
 
 
+    def extract_average_color(self):
+        # Buat list untuk menyimpan hasil
+        data = []
+
+        # Ambil gambar dari self.imagefile (pastikan ini adalah objek gambar)
+        img = self.imagefile  # Asumsikan self.imagefile berisi objek gambar
+
+        # Jika Anda juga menyimpan nama file, pastikan untuk memiliki atribut untuk itu
+        img_path = self.imagePath  # Misalnya, self.image_path menyimpan path asli dari gambar
+
+        # Konversi gambar ke numpy array
+        img_np = np.array(img)
+
+        # Ekstraksi nilai rata-rata RGB
+        avg_color_per_row = cv2.mean(img_np)[:3]  # Ambil 3 komponen pertama (R, G, B)
+        R, G, B = avg_color_per_row
+
+        # Tambahkan data ke list 
+        data.append([1, os.path.basename(img_path), R, G, B])  # Menggunakan nama file yang dipilih
+
+        # Buat DataFrame menggunakan pandas 
+        new_data_df = pd.DataFrame(data, columns=['No', 'Nama', 'R', 'G', 'B'])
+
+        output_path = 'output_ekstraksi.xlsx'
+
+        # Cek apakah file sudah ada
+        if os.path.exists(output_path):
+            # Jika file sudah ada, baca file yang ada
+            existing_df = pd.read_excel(output_path)
+
+            # Gabungkan DataFrame yang ada dengan DataFrame baru
+            combined_df = pd.concat([existing_df, new_data_df], ignore_index=True)
+        else:
+            # Jika tidak ada, gunakan DataFrame baru
+            combined_df = new_data_df
+
+        # Simpan hasil ke file excel
+        combined_df.to_excel(output_path, index=False)
+
+        print(f'Hasil ekstraksi telah disimpan di {output_path}')
+
+        # Menyimpan hasil ke self untuk keperluan lain
+        self.extractionResult = combined_df
+
+
+    def extract_glcm_features(self, image_gray, angle):
+        # Menghitung GLCM untuk sudut tertentu (0, 45, 90, 135 derajat)
+        glcm = mt.features.haralick(image_gray)
+
+        # Indeks untuk sudut yang sesuai
+        angle_indices = {0: 0, 45: 1, 90: 2, 135: 3}
+        glcm_at_angle = glcm[angle_indices[angle]]
+
+        # Ekstraksi fitur yang diperlukan dari GLCM
+        contrast = glcm_at_angle[1]  # Contrast
+        homogeneity = glcm_at_angle[4]  # Homogeneity
+        energy = glcm_at_angle[8]  # Energy
+        correlation = glcm_at_angle[2]  # Correlation 
+
+        return contrast, homogeneity, energy, correlation
+
+    def extract_glcm_features_for_angles(self):
+        # Buat list untuk menyimpan hasil
+        data = []
+
+        # Ambil gambar dari self.imagefile (pastikan ini adalah objek gambar)
+        img = self.imagefile  # Asumsikan self.imagefile berisi objek gambar
+        img_path = self.imagePath  # Misalnya, self.imagePath menyimpan path asli dari gambar
+
+        # Konversi gambar ke grayscale 
+        img_gray = cv2.cvtColor(np.array(img), cv2.COLOR_BGR2GRAY)
+
+        # Daftar sudut untuk diiterasi
+        angles = [0, 45, 90, 135]
+
+        # Iterasi untuk setiap sudut
+        for angle in angles:
+            contrast, homogeneity, energy, correlation = self.extract_glcm_features(img_gray, angle)
+            # Tambahkan data ke list
+            data.append([angle, os.path.basename(img_path), contrast, homogeneity, energy, correlation])
+
+        # Buat DataFrame menggunakan pandas 
+        df = pd.DataFrame(data, columns=['Sudut', 'Nama Gambar', 'Contrast', 'Homogenitas', 'Energi', 'Korelasi'])
+
+        output_path = 'output_Texture_Sudut_0_45_90_135.xlsx'
+
+        # Cek apakah file sudah ada
+        if os.path.exists(output_path):
+            # Jika file sudah ada, baca file yang ada
+            existing_df = pd.read_excel(output_path)
+
+            # Gabungkan DataFrame yang ada dengan DataFrame baru
+            combined_df = pd.concat([existing_df, df], ignore_index=True)
+        else:
+            # Jika tidak ada, gunakan DataFrame baru
+            combined_df = df
+
+        # Simpan hasil ke file excel
+        combined_df.to_excel(output_path, index=False)
+
+        print(f'Hasil ekstraksi fitur GLCM untuk sudut 0, 45, 90, dan 135 derajat telah disimpan di {output_path}')
+
+        # Menyimpan hasil ke self untuk keperluan lain
+        self.extractionResult = combined_df
+
+    # def extract_glcm_0(self):
+    #     self.extract_glcm_features_for_angles()
+
+    # def extract_glcm_45(self):
+    #     self.extract_glcm_features_for_angles()
+
+    # def extract_glcm_90(self):
+    #     self.extract_glcm_features_for_angles()
+
+    # def extract_glcm_135(self):
+    #     self.extract_glcm_features_for_angles()
+
+
 
 
 #############################
@@ -2589,8 +2711,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         
         
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1200, 550)
-        MainWindow.setFixedSize(1200, 550)
+        MainWindow.resize(1500, 550)
+        MainWindow.setFixedSize(1500, 550)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.graphicsView = QtWidgets.QGraphicsView(self.centralwidget)
@@ -3055,6 +3177,41 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.actionSquare_10.setObjectName("actionSquare_10")
         self.actionSquare_10.triggered.connect(self.closing_square_9)
 
+# Extraksi
+        self.menuExtraction = QtWidgets.QMenu(self.menubar)
+        self.menuExtraction.setObjectName("menuExtraction")
+        MainWindow.setMenuBar(self.menubar)
+        self.statusbar = QtWidgets.QStatusBar(MainWindow)
+        self.statusbar.setObjectName("statusbar")
+        MainWindow.setStatusBar(self.statusbar)
+
+        #set fungsi Esktraksi RGB
+        self.actionRGB = QtWidgets.QAction(MainWindow)
+        self.actionRGB.setObjectName("actionRGB")
+        self.actionRGB.triggered.connect(self.extract_average_color)
+
+        # Set fungsi Ekstraksi GLCM
+        self.actionGLCM = QtWidgets.QAction(MainWindow)
+        self.actionGLCM.setObjectName("actionGLCM")
+        self.actionGLCM.triggered.connect(self.extract_glcm_features_for_angles)
+        self.menuExtraction.addAction(self.actionRGB)
+        self.menuExtraction.addAction(self.actionGLCM)
+        
+
+        # set fungsi Extraksti RGB
+        # self.actionRGB = QtWidgets.QAction(MainWindow)
+        # self.actionRGB.setObjectName("actionRGB")
+        # self.actionRGB.triggered.connect(self.extract_average_color)
+
+        # # set Actin 0 
+        # self.action0_Derajat = QtWidgets.QAction(MainWindow)
+        # self.action0_Derajat.setObjectName("action0_Derajat")
+        # self.action0_Derajat.triggered.connect(self.extract_glcm_0)
+
+        
+      
+        
+
         self.menuFile.addAction(self.actionOpen)
         self.menuFile.addAction(self.actionSave_As)
         self.menuFile.addAction(self.actionExit)
@@ -3137,6 +3294,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.menuMorfologi.addAction(self.menuPrunning)
 
         
+        # self.menuExtraction.addAction(self.actionRGB)
+        # self.menuExtraction.addAction(self.menuGLCM.menuAction())
+        
+
 
         self.menubar.addAction(self.menuFile.menuAction())
         self.menubar.addAction(self.menuView.menuAction())
@@ -3150,7 +3311,11 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.menubar.addAction(self.menuFilter.menuAction())
         self.menubar.addAction(self.menuEdge_Detection_2.menuAction())
         self.menubar.addAction(self.menuMorfologi.menuAction())
+        self.menubar.addAction(self.menuExtraction.menuAction())
+
+        self.menubar.addAction(self.menuExtraction.menuAction())
         self.menubar.addAction(self.menuClear.menuAction())
+        
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -3267,6 +3432,10 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.actionCross_4.setText(_translate("MainWindow", "Cross 3"))
         self.actionSquare_9.setText(_translate("MainWindow", "Square 9"))
         self.actionSquare_10.setText(_translate("MainWindow", "Square 9"))
+
+        self.menuExtraction.setTitle(_translate("MainWindow", "Extraction"))
+        self.actionRGB.setText(_translate("MainWindow", "RGB"))
+        self.actionGLCM.setText(_translate("MainWindow", "GLCM"))
 
 
 if __name__ == "__main__":
