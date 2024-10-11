@@ -1690,6 +1690,68 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
             self.sceneOutput.addPixmap(scaled_pixmap_gaussian)
             self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
 
+    def segment_adaptive_thresh_mean(self):
+        # Membuka citra menggunakan self.imagefile
+        image = self.imagefile
+
+        # Mengonversi citra ke numpy array (grayscale)
+        image_np = np.array(image.convert("L"))
+
+        # Terapkan thresholding adaptif mean
+        adaptive_thresh_mean = cv2.adaptiveThreshold(image_np, 255, cv2.ADAPTIVE_THRESH_MEAN_C,
+                                                    cv2.THRESH_BINARY, 11, 2)
+
+        # Mengubah array kembali ke gambar
+        adaptive_mean_image_pil = Image.fromarray(adaptive_thresh_mean)
+
+        # Simpan hasil sementara
+        adaptive_mean_image_pil.save("output_adaptive_mean_temp.png")
+        self.imageResult = adaptive_mean_image_pil  # Simpan hasil untuk keperluan save
+
+        # Menampilkan gambar hasil di kotak output (graphicsView_2)
+        pixmap = QtGui.QPixmap("output_adaptive_mean_temp.png")
+        scaled_pixmap = pixmap.scaled(self.graphicsView_2.width(), self.graphicsView_2.height(), QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Hapus konten sebelumnya di output scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+
+        # Hapus file sementara
+        os.remove("output_adaptive_mean_temp.png")
+
+    def segment_adaptive_thresh_gaussian(self):
+        # Membuka citra menggunakan self.imagefile
+        image = self.imagefile
+
+        # Mengonversi citra ke numpy array (grayscale)
+        image_np = np.array(image.convert("L"))
+
+        # Terapkan thresholding adaptif Gaussian
+        adaptive_thresh_gaussian = cv2.adaptiveThreshold(image_np, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                                        cv2.THRESH_BINARY, 11, 2)
+
+        # Mengubah array kembali ke gambar
+        adaptive_gaussian_image_pil = Image.fromarray(adaptive_thresh_gaussian)
+
+        # Simpan hasil sementara
+        adaptive_gaussian_image_pil.save("output_adaptive_gaussian_temp.png")
+        self.imageResult = adaptive_gaussian_image_pil  # Simpan hasil untuk keperluan save
+
+        # Menampilkan gambar hasil di kotak output (graphicsView_2)
+        pixmap = QtGui.QPixmap("output_adaptive_gaussian_temp.png")
+        scaled_pixmap = pixmap.scaled(self.graphicsView_2.width(), self.graphicsView_2.height(), QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Hapus konten sebelumnya di output scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+
+        # Hapus file sementara
+        os.remove("output_adaptive_gaussian_temp.png")
+
+
+
+
+
 
     def erosion_square_3(self):
         # Membuka citra menggunakan PIL
@@ -2703,6 +2765,301 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     # def extract_glcm_135(self):
     #     self.extract_glcm_features_for_angles()
 
+    def apply_filter(self, image_np, filter_name):
+        image_out = Image.fromarray(image_np.astype(np.uint8))
+        self.imageResult = image_out
+
+        # Save the image to a temporary file
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as temp_file:
+            temp_file_path = temp_file.name
+            image_out.save(temp_file_path)
+
+        # Load the image from the temporary file into QPixmap
+        img_pixmap = QtGui.QPixmap(temp_file_path)
+
+        # Get the size of the QGraphicsView
+        view_width = self.graphicsView_2.width()
+        view_height = self.graphicsView_2.height()
+
+        # Scale the pixmap to fit the QGraphicsView, preserving the aspect ratio
+        scaled_pixmap = img_pixmap.scaled(view_width, view_height, QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Clear any previous content in the scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+
+        # delete temp file
+        os.remove(temp_file_path)
+
+        print(f'{filter_name} filter applied successfully!')
+
+    def filter_kuning(self):
+        image_np = np.array(self.imagefile)
+
+        # Apply yellow filter (increase red and green, remove blue)
+        image_np[:, :, 2] = 0  # Remove blue component
+
+        self.apply_filter(image_np, 'Yellow')
+
+    def filter_orange(self):
+        image_np = np.array(self.imagefile)
+
+        # Apply orange filter (reduce blue component)
+        image_np[:, :, 2] = image_np[:, :, 2] // 2  # Reduce blue component
+
+        self.apply_filter(image_np, 'Orange')
+
+    def filter_cyan(self):
+        image_np = np.array(self.imagefile)
+
+        # Apply cyan filter (remove red component)
+        image_np[:, :, 0] = 0  # Remove red component
+
+        self.apply_filter(image_np, 'Cyan')
+
+    def filter_purple(self):
+        image_np = np.array(self.imagefile)
+
+        # Apply purple filter (remove green component)
+        image_np[:, :, 1] = 0  # Remove green component
+
+        self.apply_filter(image_np, 'Purple')
+
+    def filter_grey(self):
+        image_np = np.array(self.imagefile)
+
+        # Convert to greyscale
+        grey_image = np.mean(image_np, axis=2).astype(np.uint8)
+
+        self.apply_filter(grey_image, 'Grey')
+
+    def filter_coklat(self):
+        image_np = np.array(self.imagefile)
+
+        # Apply brown filter (adjust red, green, blue components)
+        brown_filter = image_np.copy()
+        brown_filter[:, :, 0] = brown_filter[:, :, 0] // 2  # Reduce blue
+        brown_filter[:, :, 1] = brown_filter[:, :, 1] // 3  # Reduce green
+
+        self.apply_filter(brown_filter, 'Brown')
+
+    def filter_merah(self):
+        image_np = np.array(self.imagefile)
+
+        # Apply red filter (remove green and blue components)
+        image_np[:, :, 0] = 0  # Remove blue component
+        image_np[:, :, 1] = 0  # Remove green component
+
+        self.apply_filter(image_np, 'Red')
+
+
+    def gamma_correction(self, gamma=1.0):
+        if gamma <= 0:
+            raise ValueError("Gamma value must be greater than 0")
+        
+        # Membuka citra menggunakan PIL
+        image = self.imagefile
+        
+        # Mengonversi citra ke numpy array
+        image_np = np.array(image)
+        
+        # Melakukan gamma correction
+        inv_gamma = 1.0 / gamma
+        gamma_corrected_np = np.array(255 * (image_np / 255) ** inv_gamma, dtype='uint8')
+        
+        # Mengubah array kembali ke gambar
+        gamma_corrected_image = Image.fromarray(gamma_corrected_np)
+        self.imageResult = gamma_corrected_image  # Simpan hasil untuk keperluan save
+
+        # Menyimpan citra gamma correction sebagai Image object
+        gamma_corrected_image.save("output_gamma_temp.jpg")  # Simpan sementara
+
+        # Menampilkan gambar gamma correction di kotak output (Kotak2)
+        pixmap = QtGui.QPixmap("output_gamma_temp.jpg")
+        scaled_pixmap = pixmap.scaled(self.graphicsView_2.width(), self.graphicsView_2.height(), QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Hapus konten sebelumnya di output scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+
+    def applyRed(self):
+        # Membuka citra menggunakan PIL
+        image = self.imagefile
+
+        # Mengonversi citra ke numpy array
+        image_np = np.array(image)
+
+        # Melakukan transformasi warna merah
+        red_image_np = image_np.copy()
+        red_image_np[:, :, 1] = 0  # Set green channel to 0
+        red_image_np[:, :, 2] = 0  # Set blue channel to 0
+
+        # Mengubah array kembali ke gambar
+        red_image = Image.fromarray(red_image_np.astype(np.uint8))
+        self.imageResult = red_image  # Simpan hasil untuk keperluan save
+
+        # Menyimpan citra merah sebagai Image object
+        red_image.save("output_red_temp.jpg")  # Simpan sementara
+
+        # Menampilkan gambar merah di kotak output (Kotak2)
+        pixmap = QtGui.QPixmap("output_red_temp.jpg")
+        scaled_pixmap = pixmap.scaled(self.graphicsView_2.width(), self.graphicsView_2.height(), QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Hapus konten sebelumnya di output scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+        
+        # self.labelOutput.setText('Effect : RGB - Red ')
+        # self.showEffectComplete()
+
+    def applyGreen(self):
+        # Membuka citra menggunakan PIL
+        image = self.imagefile
+
+        # Mengonversi citra ke numpy array
+        image_np = np.array(image)
+
+        # Melakukan transformasi warna hijau
+        green_image_np = image_np.copy()
+        green_image_np[:, :, 0] = 0  # Set red channel to 0
+        green_image_np[:, :, 2] = 0  # Set blue channel to 0
+
+        # Mengubah array kembali ke gambar
+        green_image = Image.fromarray(green_image_np.astype(np.uint8))
+        self.imageResult = green_image  # Simpan hasil untuk keperluan save
+
+        # Menyimpan citra hijau sebagai Image object
+        green_image.save("output_green_temp.jpg")  # Simpan sementara
+
+        # Menampilkan gambar hijau di kotak output (Kotak2)
+        pixmap = QtGui.QPixmap("output_green_temp.jpg")
+        scaled_pixmap = pixmap.scaled(self.graphicsView_2.width(), self.graphicsView_2.height(), QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Hapus konten sebelumnya di output scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+        
+        # self.labelOutput.setText('Effect : RGB - Green ')
+        # self.showEffectComplete()
+
+    def applyBlue(self):
+        # Membuka citra menggunakan PIL
+        image = self.imagefile
+
+        # Mengonversi citra ke numpy array
+        image_np = np.array(image)
+
+        # Melakukan transformasi warna biru
+        blue_image_np = image_np.copy()
+        blue_image_np[:, :, 0] = 0  # Set red channel to 0
+        blue_image_np[:, :, 1] = 0  # Set green channel to 0
+
+        # Mengubah array kembali ke gambar
+        blue_image = Image.fromarray(blue_image_np.astype(np.uint8))
+        self.imageResult = blue_image  # Simpan hasil untuk keperluan save
+
+        # Menyimpan citra biru sebagai Image object
+        blue_image.save("output_blue_temp.jpg")  # Simpan sementara
+
+        # Menampilkan gambar biru di kotak output (Kotak2)
+        pixmap = QtGui.QPixmap("output_blue_temp.jpg")
+        scaled_pixmap = pixmap.scaled(self.graphicsView_2.width(), self.graphicsView_2.height(), QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Hapus konten sebelumnya di output scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+        
+        # self.labelOutput.setText('Effect : RGB - Blue ')
+        # self.showEffectComplete()
+
+    def applyYellow(self):
+        # Membuka citra menggunakan PIL
+        image = self.imagefile
+
+        # Mengonversi citra ke numpy array
+        image_np = np.array(image)
+
+        # Melakukan transformasi warna kuning
+        yellow_image_np = image_np.copy()
+        yellow_image_np[:, :, 2] = 0  # Set blue channel to 0
+
+        # Mengubah array kembali ke gambar
+        yellow_image = Image.fromarray(yellow_image_np.astype(np.uint8))
+        self.imageResult = yellow_image  # Simpan hasil untuk keperluan save
+
+        # Menyimpan citra kuning sebagai Image object
+        yellow_image.save("output_yellow_temp.jpg")  # Simpan sementara
+
+        # Menampilkan gambar kuning di kotak output (Kotak2)
+        pixmap = QtGui.QPixmap("output_yellow_temp.jpg")
+        scaled_pixmap = pixmap.scaled(self.graphicsView_2.width(), self.graphicsView_2.height(), QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Hapus konten sebelumnya di output scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+        
+        # self.labelOutput.setText('Effect : RGB - Yellow ')
+        # self.showEffectComplete()
+
+    def applyOrange(self):
+        # Membuka citra menggunakan PIL
+        image = self.imagefile
+
+        # Mengonversi citra ke numpy array
+        image_np = np.array(image)
+
+        # Melakukan transformasi warna jingga (red + green)
+        orange_image_np = image_np.copy()
+        orange_image_np[:, :, 0] = np.clip(orange_image_np[:, :, 0] + 50, 0, 255)  # Increase red
+        orange_image_np[:, :, 1] = np.clip(orange_image_np[:, :, 1] - 50, 0, 255)  # Decrease green
+        orange_image_np[:, :, 2] = 0  # Set blue channel to 0
+
+        # Mengubah array kembali ke gambar
+        orange_image = Image.fromarray(orange_image_np.astype(np.uint8))
+        self.imageResult = orange_image  # Simpan hasil untuk keperluan save
+
+        # Menyimpan citra jingga sebagai Image object
+        orange_image.save("output_orange_temp.jpg")  # Simpan sementara
+
+        # Menampilkan gambar jingga di kotak output (Kotak2)
+        pixmap = QtGui.QPixmap("output_orange_temp.jpg")
+        scaled_pixmap = pixmap.scaled(self.graphicsView_2.width(), self.graphicsView_2.height(), QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Hapus konten sebelumnya di output scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+        
+        # self.labelOutput.setText('Effect : RGB - Orange ')
+        # self.showEffectComplete()
+
+    def applyCyan(self):
+        # Membuka citra menggunakan PIL
+        image = self.imagefile
+
+        # Mengonversi citra ke numpy array
+        image_np = np.array(image)
+
+        # Melakukan transformasi warna cyan (G + B)
+        cyan_image_np = image_np.copy()
+        cyan_image_np[:, :, 0] = 0  # Set red channel to 0
+
+        # Mengubah array kembali ke gambar
+        cyan_image = Image.fromarray(cyan_image_np.astype(np.uint8))
+        self.imageResult = cyan_image  # Simpan hasil untuk keperluan save
+
+        # Menyimpan citra cyan sebagai Image object
+        cyan_image.save("output_cyan_temp.jpg")  # Simpan sementara
+
+        # Menampilkan gambar cyan di kotak output (Kotak2)
+        pixmap = QtGui.QPixmap("output_cyan_temp.jpg")
+        scaled_pixmap = pixmap.scaled(self.graphicsView_2.width(), self.graphicsView_2.height(), QtCore.Qt.KeepAspectRatio)
+
+        self.sceneOutput.clear()  # Hapus konten sebelumnya di output scene
+        self.sceneOutput.addPixmap(scaled_pixmap)
+        self.graphicsView_2.setSceneRect(self.sceneOutput.itemsBoundingRect())
+        
+        # self.labelOutput.setText('Effect : RGB - Cyan ')
+        # self.showEffectComplete()
 
 
 
@@ -2936,21 +3293,37 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
 
         self.actionGamma_Correstion = QtWidgets.QAction(MainWindow)
         self.actionGamma_Correstion.setObjectName("actionGamma_Correstion")
+        self.actionGamma_Correstion.triggered.connect(lambda: self.gamma_correction(gamma=2.0))
         
+        # set fungsi Kuning
         self.actionKuning = QtWidgets.QAction(MainWindow)
         self.actionKuning.setObjectName("actionKuning")
-        self.actionKuning.triggered.connect(self.color_yellow)
+        self.actionKuning.triggered.connect(self.applyYellow)
 
+        # set fungsi Orange
         self.actionOrange = QtWidgets.QAction(MainWindow)
         self.actionOrange.setObjectName("actionOrange")
+        self.actionOrange.triggered.connect(self.filter_orange)
+
+        # set fungsi Cyan 
         self.actionCyan = QtWidgets.QAction(MainWindow)
         self.actionCyan.setObjectName("actionCyan")
+        self.actionCyan.triggered.connect(self.applyCyan)
+
+        # set fungsi Purple
         self.actionPurple = QtWidgets.QAction(MainWindow)
         self.actionPurple.setObjectName("actionPurple")
+        self.actionPurple.triggered.connect(self.filter_purple)
+
+        # set fungsi Gray
         self.actionGrey = QtWidgets.QAction(MainWindow)
         self.actionGrey.setObjectName("actionGrey")
+        self.actionGrey.triggered.connect(self.filter_grey)
+
+        # set fungsi coklat
         self.actionCoklat = QtWidgets.QAction(MainWindow)
         self.actionCoklat.setObjectName("actionCoklat")
+        self.actionCoklat.triggered.connect(self.filter_coklat)
 
         #set Grayscale_Average
         self.actionAverage = QtWidgets.QAction(MainWindow)
@@ -3061,12 +3434,24 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.actionAdaptive_Thresholding.setObjectName("actionAdaptive_Thresholding")
         self.actionAdaptive_Thresholding.triggered.connect(self.adaptive_thesholding)
 
+        #set fungsi adaptive actionAdaptive_ThreshMean
+        self.actionAdaptive_ThreshMean = QtWidgets.QAction(MainWindow)
+        self.actionAdaptive_ThreshMean.setObjectName("actionAdaptive_ThreshMean")
+        self.actionAdaptive_ThreshMean.triggered.connect(self.segment_adaptive_thresh_mean)
+
+        #set fungsi adaptive actionAdaptive_ThreshGaussian
+        self.actionAdaptive_ThreshGaussian = QtWidgets.QAction(MainWindow)
+        self.actionAdaptive_ThreshGaussian.setObjectName("actionAdaptive_ThreshGaussian")
+        self.actionAdaptive_ThreshGaussian.triggered.connect(self.segment_adaptive_thresh_gaussian)
+
 
         self.menuSegmentasi.addAction(self.actionRegion_Growing)
         self.menuSegmentasi.addAction(self.actionK_Means_Clustering)
         self.menuSegmentasi.addAction(self.actionWatershed)
         self.menuSegmentasi.addAction(self.actionGlobal_Thresholding)
         self.menuSegmentasi.addAction(self.actionAdaptive_Thresholding)
+        self.menuSegmentasi.addAction(self.actionAdaptive_ThreshMean)
+        self.menuSegmentasi.addAction(self.actionAdaptive_ThreshGaussian)
        
         # set fungsi identity
         self.actionIdentity = QtWidgets.QAction(MainWindow)
@@ -3335,6 +3720,8 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
         self.actionWatershed.setText(_translate("MainWindow", "Watershed"))
         self.actionGlobal_Thresholding.setText(_translate("MainWindow", "Global Thresholding"))
         self.actionAdaptive_Thresholding.setText(_translate("MainWindow", "Adaptive Thresholding"))
+        self.actionAdaptive_ThreshMean.setText(_translate("MainWindow", "Adaptive Thresh Mean"))
+        self.actionAdaptive_ThreshGaussian.setText(_translate("MainWindow", "Adaptive Thresh Gaussian"))
 
         self.menuTransform.setTitle(_translate("MainWindow", "Transform"))
         self.menuFlipping_2.setTitle(_translate("MainWindow", "Flipping"))
