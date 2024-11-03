@@ -3067,16 +3067,15 @@ class Ui_MainWindow(QtWidgets.QMainWindow):
     def setupUi(self, MainWindow):
         
         
-        MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1500, 550)
-        MainWindow.setFixedSize(1500, 550)
+        MainWindow.resize(1300, 550)
+        MainWindow.setFixedSize(1300, 550)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.graphicsView = QtWidgets.QGraphicsView(self.centralwidget)
-        self.graphicsView.setGeometry(QtCore.QRect(10, 20, 581, 451))
+        self.graphicsView.setGeometry(QtCore.QRect(10, 20, 630, 461))
         self.graphicsView.setObjectName("graphicsView")
         self.graphicsView_2 = QtWidgets.QGraphicsView(self.centralwidget)
-        self.graphicsView_2.setGeometry(QtCore.QRect(611, 20, 581, 451))
+        self.graphicsView_2.setGeometry(QtCore.QRect(650, 20, 630, 461))
         MainWindow.setCentralWidget(self.centralwidget)
         
         self.menubar = QtWidgets.QMenuBar(MainWindow)
